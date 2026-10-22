@@ -1,2 +1,2 @@
 # PhoneShop
-He thong ban dien thoai
+Hệ thống bán điện thoại
