@@ -1,0 +1,164 @@
+﻿@model List<PhoneShop.Models.Order>
+
+@{
+    ViewData["Title"] = "Lịch sử mua hàng";
+
+    var culture =
+        System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="mb-2">Đơn hàng của tôi</h1>
+
+        <p class="text-muted mb-0">
+            Theo dõi trạng thái và xem lại các đơn hàng đã đặt.
+        </p>
+    </div>
+
+    <a asp-controller="Home"
+       asp-action="Index"
+       class="btn btn-outline-primary">
+        Tiếp tục mua sắm
+    </a>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="card card-body text-center py-5">
+        <h4>Bạn chưa có đơn hàng nào</h4>
+
+        <p class="text-muted">
+            Khám phá điện thoại và đặt đơn hàng đầu tiên của bạn.
+        </p>
+
+        <a asp-controller="Home"
+           asp-action="Index"
+           class="btn btn-primary align-self-center">
+            Xem điện thoại
+        </a>
+    </div>
+}
+else
+{
+    <p class="text-muted">
+        Tổng cộng @Model.Count đơn hàng.
+    </p>
+
+    <div class="table-responsive mb-4">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Mã đơn</th>
+                    <th>Ngày đặt (giờ Việt Nam)</th>
+                    <th class="text-end">Tổng tiền</th>
+                    <th>Trạng thái đơn</th>
+                    <th>Thanh toán</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var order in Model)
+                {
+                    var status = order.Status switch
+                    {
+                        PhoneShop.Models.OrderStatus.Pending =>
+                            "Chờ xác nhận",
+
+                        PhoneShop.Models.OrderStatus.Confirmed =>
+                            "Đã xác nhận",
+
+                        PhoneShop.Models.OrderStatus.Shipping =>
+                            "Đang giao",
+
+                        PhoneShop.Models.OrderStatus.Delivered =>
+                            "Đã giao",
+
+                        PhoneShop.Models.OrderStatus.Cancelled =>
+                            "Đã hủy",
+
+                        _ => "Không xác định"
+                    };
+
+                    var statusClass = order.Status switch
+                    {
+                        PhoneShop.Models.OrderStatus.Pending =>
+                            "bg-warning text-dark",
+
+                        PhoneShop.Models.OrderStatus.Confirmed =>
+                            "bg-primary",
+
+                        PhoneShop.Models.OrderStatus.Shipping =>
+                            "bg-info text-dark",
+
+                        PhoneShop.Models.OrderStatus.Delivered =>
+                            "bg-success",
+
+                        PhoneShop.Models.OrderStatus.Cancelled =>
+                            "bg-secondary",
+
+                        _ => "bg-secondary"
+                    };
+
+                    var payment = order.PaymentStatus switch
+                    {
+                        PhoneShop.Models.PaymentStatus.Paid =>
+                            "Đã thanh toán",
+
+                        PhoneShop.Models.PaymentStatus.Refunded =>
+                            "Đã hoàn tiền",
+
+                        _ => "Chưa thanh toán"
+                    };
+
+                    var paymentClass = order.PaymentStatus switch
+                    {
+                        PhoneShop.Models.PaymentStatus.Paid =>
+                            "bg-success",
+
+                        PhoneShop.Models.PaymentStatus.Refunded =>
+                            "bg-secondary",
+
+                        _ => "bg-warning text-dark"
+                    };
+
+                    <tr>
+                        <td class="fw-bold text-nowrap">
+                            #@order.Id
+                        </td>
+
+                        <td class="text-nowrap">
+                            @(order.CreatedAtUtc.AddHours(7).ToString("dd/MM/yyyy HH:mm"))
+                        </td>
+
+                        <td class="text-end text-nowrap fw-semibold">
+                            @(order.TotalAmount.ToString("N0", culture)) ₫
+                        </td>
+
+                        <td>
+                            <span class="badge @statusClass px-3 py-2">
+                                @status
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="badge @paymentClass px-3 py-2">
+                                @payment
+                            </span>
+                        </td>
+
+                        <td class="text-end">
+                            <a asp-controller="Orders"
+                               asp-action="Details"
+                               asp-route-id="@order.Id"
+                               class="btn btn-outline-primary btn-sm text-nowrap">
+                                Xem chi tiết
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

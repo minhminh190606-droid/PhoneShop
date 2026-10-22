@@ -1,0 +1,269 @@
+﻿@model List<PhoneShop.Models.CartItem>
+
+@{
+    ViewData["Title"] = "Giỏ hàng";
+
+    var culture =
+        System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
+
+    var total = Model.Sum(c => c.Product.Price * c.Quantity);
+
+    var hasUnavailableItems = Model.Any(c =>
+        !c.Product.IsActive ||
+        c.Product.StockQuantity < c.Quantity ||
+        c.Quantity < 1 ||
+        c.Quantity > 99 ||
+        c.Product.Price <= 0);
+}
+
+<h1 class="mb-4">Giỏ hàng</h1>
+
+@if (TempData["CartSuccess"] is string success)
+{
+    <div class="alert alert-success">@success</div>
+}
+
+@if (TempData["CartError"] is string error)
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+@if (Model.Count == 0)
+{
+    <div class="card card-body text-center py-5">
+        <h4>Giỏ hàng đang trống</h4>
+
+        <p class="text-muted">
+            Chọn điện thoại yêu thích để bắt đầu mua sắm.
+        </p>
+
+        <a asp-controller="Home"
+           asp-action="Index"
+           class="btn btn-primary align-self-center">
+            Xem điện thoại
+        </a>
+    </div>
+}
+else
+{
+    <p class="text-muted">
+        Có @Model.Count loại điện thoại trong giỏ hàng.
+    </p>
+
+    <div class="table-responsive mb-4">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Điện thoại</th>
+                    <th>Đơn giá</th>
+                    <th style="min-width: 220px">Số lượng</th>
+                    <th>Thành tiền</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    var product = item.Product;
+                    var imageUrl = product.ImageUrl;
+
+                    if (string.IsNullOrWhiteSpace(imageUrl))
+                    {
+                        imageUrl = product.Name switch
+                        {
+                            "iPhone 15" =>
+                                "~/images/iphone15.jfif",
+
+                            "Samsung Galaxy S24" =>
+                                "~/images/samsung-s24.jfif",
+
+                            "Xiaomi Redmi Note 13" =>
+                                "~/images/xiaomi-note13.jfif",
+
+                            _ => null
+                        };
+                    }
+
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="cart-image-box">
+                                    @if (!string.IsNullOrWhiteSpace(imageUrl))
+                                    {
+                                        <img src="@Url.Content(imageUrl)"
+                                             alt="@product.Name"
+                                             class="cart-product-image"
+                                             loading="lazy" />
+                                    }
+                                    else
+                                    {
+                                        <span class="small text-muted">
+                                            Chưa có ảnh
+                                        </span>
+                                    }
+                                </div>
+
+                                <div style="min-width: 160px">
+                                    @if (product.IsActive)
+                                    {
+                                        <a asp-controller="Home"
+                                           asp-action="Details"
+                                           asp-route-id="@product.Id"
+                                           class="fw-bold text-dark text-decoration-none">
+                                            @product.Name
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <strong>@product.Name</strong>
+                                    }
+
+                                    <div class="text-muted small mt-1">
+                                        @product.Brand
+                                    </div>
+
+                                    <div class="text-muted small">
+                                        RAM @product.RamGb GB /
+                                        @product.StorageGb GB
+                                    </div>
+
+                                    @if (!product.IsActive)
+                                    {
+                                        <div class="text-danger small mt-1">
+                                            Sản phẩm đã ngừng bán.
+                                        </div>
+                                    }
+                                    else if (product.StockQuantity <= 0)
+                                    {
+                                        <div class="text-danger small mt-1">
+                                            Sản phẩm đã hết hàng.
+                                        </div>
+                                    }
+                                    else if (item.Quantity > product.StockQuantity)
+                                    {
+                                        <div class="text-danger small mt-1">
+                                            Chỉ còn @product.StockQuantity máy.
+                                            Vui lòng giảm số lượng.
+                                        </div>
+                                    }
+
+                                    @if (product.Price <= 0)
+                                    {
+                                        <div class="text-danger small mt-1">
+                                            Giá sản phẩm chưa hợp lệ.
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="text-nowrap">
+                            @(product.Price.ToString("N0", culture)) ₫
+                        </td>
+
+                        <td>
+                            <form asp-controller="Cart"
+                                  asp-action="Update"
+                                  method="post"
+                                  class="d-flex align-items-center gap-2">
+
+                                <input type="hidden"
+                                       name="id"
+                                       value="@item.Id" />
+
+                                <input type="number"
+                                       name="quantity"
+                                       value="@item.Quantity"
+                                       min="1"
+                                       max="99"
+                                       required
+                                       aria-label="Số lượng @product.Name"
+                                       class="form-control"
+                                       style="width: 85px" />
+
+                                <button type="submit"
+                                        class="btn btn-outline-primary text-nowrap">
+                                    Cập nhật
+                                </button>
+                            </form>
+                        </td>
+
+                        <td class="text-nowrap fw-semibold">
+                            @((product.Price * item.Quantity).ToString("N0", culture)) ₫
+                        </td>
+
+                        <td>
+                            <form asp-controller="Cart"
+                                  asp-action="Remove"
+                                  method="post">
+
+                                <input type="hidden"
+                                       name="id"
+                                       value="@item.Id" />
+
+                                <button type="submit"
+                                        class="btn btn-outline-danger">
+                                    Xóa
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row justify-content-end mb-4">
+        <div class="col-md-6 col-lg-5">
+            <div class="card card-body">
+                <h4 class="mb-3">Tóm tắt giỏ hàng</h4>
+
+                <div class="d-flex justify-content-between gap-3 mb-2">
+                    <span>Tổng số lượng</span>
+                    <strong>@Model.Sum(c => c.Quantity) máy</strong>
+                </div>
+
+                <div class="d-flex justify-content-between gap-3">
+                    <span>Tạm tính</span>
+                    <strong class="text-danger text-nowrap">
+                        @(total.ToString("N0", culture)) ₫
+                    </strong>
+                </div>
+
+                <p class="text-muted small mt-3">
+                    Bạn có thể nhập mã khuyến mãi ở bước đặt hàng.
+                    Sản phẩm chưa được giữ chỗ khi nằm trong giỏ.
+                </p>
+
+                @if (hasUnavailableItems)
+                {
+                    <div class="alert alert-warning small">
+                        Vui lòng cập nhật hoặc xóa sản phẩm
+                        không hợp lệ trước khi đặt hàng.
+                    </div>
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            disabled>
+                        Tiến hành đặt hàng
+                    </button>
+                }
+                else
+                {
+                    <a asp-controller="Orders"
+                       asp-action="Checkout"
+                       class="btn btn-primary">
+                        Tiến hành đặt hàng
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <a asp-controller="Home"
+       asp-action="Index"
+       class="btn btn-outline-secondary">
+        ← Tiếp tục mua sắm
+    </a>
+}

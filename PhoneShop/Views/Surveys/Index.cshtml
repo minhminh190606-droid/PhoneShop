@@ -1,0 +1,100 @@
+﻿@model List<PhoneShop.ViewModels.CustomerSurveyViewModel>
+
+@{
+    ViewData["Title"] = "Khảo sát khách hàng";
+
+    var answeredCount = Model.Count(s => s.HasAnswered);
+    var unansweredCount = Model.Count(s => !s.HasAnswered);
+}
+
+<h1 class="mb-2">Khảo sát khách hàng</h1>
+
+<p class="text-muted mb-4">
+    Ý kiến của bạn giúp PhoneShop cải thiện dịch vụ.
+    Mỗi tài khoản được trả lời một lần cho mỗi khảo sát.
+</p>
+
+@if (TempData["SurveySuccess"] is string success)
+{
+    <div class="alert alert-success" role="status">
+        @success
+    </div>
+}
+
+@if (TempData["SurveyError"] is string error)
+{
+    <div class="alert alert-danger" role="alert">
+        @error
+    </div>
+}
+
+@if (Model.Count == 0)
+{
+    <div class="card card-body text-center py-5">
+        <h4>Chưa có khảo sát đang mở</h4>
+
+        <p class="text-muted">
+            Bạn có thể quay lại sau để gửi ý kiến.
+        </p>
+
+        <a asp-controller="Home"
+           asp-action="Index"
+           class="btn btn-primary align-self-center">
+            Về trang chủ
+        </a>
+    </div>
+}
+else
+{
+    <p class="text-muted mb-4">
+        Trong @Model.Count khảo sát đang mở:
+        bạn đã trả lời @answeredCount,
+        còn @unansweredCount chưa trả lời.
+    </p>
+
+    <div class="row g-4">
+        @foreach (var survey in Model)
+        {
+            <div class="col-12 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3">
+                            <span class="badge @(survey.HasAnswered
+                                ? "bg-success"
+                                : "bg-info text-dark") px-3 py-2">
+                                @(survey.HasAnswered
+                                    ? "Đã trả lời"
+                                    : "Chưa trả lời")
+                            </span>
+                        </div>
+
+                        <h2 class="h5 mb-3 text-break">
+                            @survey.Title
+                        </h2>
+
+                        <p class="text-muted text-break"
+                           style="white-space: pre-wrap">@survey.Question</p>
+
+                        <div class="mt-auto pt-3">
+                            @if (survey.HasAnswered)
+                            {
+                                <p class="text-success mb-0">
+                                    Cảm ơn bạn đã gửi ý kiến!
+                                </p>
+                            }
+                            else
+                            {
+                                <a asp-controller="Surveys"
+                                   asp-action="Answer"
+                                   asp-route-id="@survey.Id"
+                                   class="btn btn-primary">
+                                    Trả lời khảo sát
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

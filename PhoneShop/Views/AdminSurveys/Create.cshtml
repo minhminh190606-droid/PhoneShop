@@ -1,0 +1,104 @@
+﻿@model PhoneShop.ViewModels.SurveyFormViewModel
+
+@{
+    ViewData["Title"] = "Tạo khảo sát";
+}
+
+<a asp-controller="AdminSurveys"
+   asp-action="Index"
+   class="btn btn-outline-secondary mb-4">
+    ← Danh sách khảo sát
+</a>
+
+<h1 class="mb-2">Tạo khảo sát</h1>
+
+<p class="text-muted mb-4">
+    Đặt câu hỏi để thu thập ý kiến khách hàng.
+</p>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="card card-body p-4">
+            <h4 class="mb-3">Thông tin khảo sát</h4>
+
+            <form asp-controller="AdminSurveys"
+                  asp-action="Create"
+                  method="post">
+
+                <div asp-validation-summary="All"
+                     class="text-danger mb-3"
+                     role="alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Title"
+                           class="form-label"></label>
+
+                    <input asp-for="Title"
+                           class="form-control"
+                           maxlength="150"
+                           placeholder="Ví dụ: Góp ý trải nghiệm mua hàng" />
+
+                    <span asp-validation-for="Title"
+                          class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Question"
+                           class="form-label"></label>
+
+                    <textarea asp-for="Question"
+                              class="form-control"
+                              rows="5"
+                              maxlength="1000"
+                              placeholder="Ví dụ: Bạn muốn PhoneShop cải thiện điều gì?"
+                              aria-describedby="questionHelp"></textarea>
+
+                    <span asp-validation-for="Question"
+                          class="text-danger small"></span>
+
+                    <div id="questionHelp" class="form-text">
+                        Tối đa 1.000 ký tự.
+                        Mỗi khảo sát gồm một câu hỏi tự luận.
+                    </div>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input asp-for="IsActive"
+                           class="form-check-input"
+                           aria-describedby="activeHelp" />
+
+                    <label asp-for="IsActive"
+                           class="form-check-label"></label>
+
+                    <div id="activeHelp" class="form-text">
+                        Khi bật, khách hàng có thể nhìn thấy
+                        và trả lời khảo sát sau khi đăng nhập.
+                    </div>
+                </div>
+
+                <div class="alert alert-light border small mb-4">
+                    Mỗi tài khoản được gửi một câu trả lời
+                    cho mỗi khảo sát. Bạn có thể đóng hoặc
+                    mở lại khảo sát trong trang quản lý.
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 border-top pt-4">
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Tạo khảo sát
+                    </button>
+
+                    <a asp-controller="AdminSurveys"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary">
+                        Quay lại
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

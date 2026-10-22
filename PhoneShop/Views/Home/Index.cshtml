@@ -1,0 +1,325 @@
+﻿@model List<PhoneShop.Models.Product>
+
+@{
+    ViewData["Title"] = "Trang chủ";
+
+    var culture =
+        System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
+
+    var selectedBrand = Context.Request.Query["brand"].ToString();
+
+    var brands = ViewBag.Brands as IEnumerable<string>
+        ?? Enumerable.Empty<string>();
+}
+
+<div class="phone-home">
+
+    <section class="phone-hero">
+        <div class="phone-hero-content">
+            <span class="phone-eyebrow">PHONESHOP · ĐIỆN THOẠI</span>
+
+            <h1>
+                Điện thoại phù hợp.<br />
+                Trải nghiệm khác biệt.
+            </h1>
+
+            <p>
+                Khám phá và so sánh điện thoại theo hãng,
+                cấu hình và ngân sách của bạn.
+            </p>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a href="#san-pham" class="btn phone-hero-button">
+                    Khám phá điện thoại →
+                </a>
+
+                <a asp-controller="Promotions"
+                   asp-action="Index"
+                   class="btn phone-hero-secondary">
+                    Xem khuyến mãi
+                </a>
+            </div>
+        </div>
+
+        <div class="phone-hero-visual" aria-hidden="true">
+            <div class="phone-hero-orbit"></div>
+
+            <div class="phone-device phone-device-back">
+                <div class="phone-device-camera"></div>
+            </div>
+
+            <div class="phone-device phone-device-front">
+                <div class="phone-device-island"></div>
+                <div class="phone-device-screen">
+                    <span>PhoneShop</span>
+                    <strong>Hello.</strong>
+                    <small>Khám phá điều bạn thích</small>
+                </div>
+            </div>
+
+            <div class="phone-visual-label">
+                Công nghệ trong tầm tay
+            </div>
+        </div>
+    </section>
+
+    <section id="san-pham" class="phone-catalog">
+
+        <div class="phone-section-heading">
+            <div>
+                <span class="phone-section-kicker">KHÁM PHÁ BỘ SƯU TẬP</span>
+                <h2>Chọn chiếc điện thoại của bạn</h2>
+            </div>
+
+            <a asp-controller="Home"
+               asp-action="Index"
+               class="phone-text-link">
+                Tất cả sản phẩm →
+            </a>
+        </div>
+
+        <form asp-controller="Home"
+              asp-action="Index"
+              method="get"
+              class="phone-filter">
+
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label for="keyword" class="form-label">
+                        Tìm điện thoại
+                    </label>
+
+                    <input id="keyword"
+                           type="search"
+                           name="keyword"
+                           value="@Context.Request.Query["keyword"]"
+                           maxlength="150"
+                           class="form-control"
+                           placeholder="Tên điện thoại hoặc hãng..." />
+                </div>
+
+                <div class="col-md-4">
+                    <label for="brand" class="form-label">Hãng</label>
+
+                    <select id="brand"
+                            name="brand"
+                            class="form-select">
+
+                        <option value="">Tất cả hãng</option>
+
+                        @foreach (var brand in brands)
+                        {
+                            <option value="@brand"
+                                    selected="@(selectedBrand == brand)">
+                                @brand
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label for="minPrice" class="form-label">
+                        Giá từ (đồng)
+                    </label>
+
+                    <input id="minPrice"
+                           type="number"
+                           name="minPrice"
+                           min="0"
+                           step="1"
+                           value="@Context.Request.Query["minPrice"]"
+                           class="form-control"
+                           placeholder="Không giới hạn" />
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label for="maxPrice" class="form-label">
+                        Giá đến (đồng)
+                    </label>
+
+                    <input id="maxPrice"
+                           type="number"
+                           name="maxPrice"
+                           min="0"
+                           step="1"
+                           value="@Context.Request.Query["maxPrice"]"
+                           class="form-control"
+                           placeholder="Không giới hạn" />
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label for="ramGb" class="form-label">
+                        RAM (GB)
+                    </label>
+
+                    <input id="ramGb"
+                           type="number"
+                           name="ramGb"
+                           min="1"
+                           step="1"
+                           value="@Context.Request.Query["ramGb"]"
+                           class="form-control"
+                           placeholder="Ví dụ: 8" />
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label for="storageGb" class="form-label">
+                        Bộ nhớ (GB)
+                    </label>
+
+                    <input id="storageGb"
+                           type="number"
+                           name="storageGb"
+                           min="1"
+                           step="1"
+                           value="@Context.Request.Query["storageGb"]"
+                           class="form-control"
+                           placeholder="Ví dụ: 128" />
+                </div>
+
+                <div class="col-12">
+                    <div class="phone-filter-actions">
+                        <span class="phone-filter-hint">
+                            Lọc theo nhu cầu và ngân sách của bạn.
+                        </span>
+
+                        <div class="d-flex flex-wrap gap-2">
+                            <a asp-controller="Home"
+                               asp-action="Index"
+                               class="btn phone-reset-button">
+                                Xóa bộ lọc
+                            </a>
+
+                            <button type="submit"
+                                    class="btn phone-search-button">
+                                Tìm điện thoại →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        @if (ViewData["FilterError"] is string error)
+        {
+            <div class="alert alert-danger">@error</div>
+        }
+        else
+        {
+            <div class="phone-results">
+                <p>
+                    Tìm thấy <strong>@Model.Count</strong> điện thoại
+                </p>
+                <span>Khám phá lựa chọn phù hợp với bạn</span>
+            </div>
+        }
+
+        @if (Model.Count == 0 && ViewData["FilterError"] == null)
+        {
+            <div class="phone-empty">
+                <h3>Chưa tìm thấy điện thoại phù hợp</h3>
+                <p>Thử thay đổi từ khóa hoặc giảm bớt điều kiện lọc.</p>
+
+                <a asp-controller="Home"
+                   asp-action="Index"
+                   class="btn phone-search-button">
+                    Xem tất cả điện thoại
+                </a>
+            </div>
+        }
+
+        <div class="row g-4">
+            @foreach (var product in Model)
+            {
+                var imagePath = !string.IsNullOrWhiteSpace(product.ImageUrl)
+                    ? product.ImageUrl
+                    : product.Name switch
+                    {
+                        "iPhone 15" => "~/images/iphone15.jfif",
+                        "Samsung Galaxy S24" => "~/images/samsung-s24.jfif",
+                        "Xiaomi Redmi Note 13" => "~/images/xiaomi-note13.jfif",
+                        _ => null
+                    };
+
+                <div class="col-sm-6 col-lg-4">
+                    <article class="phone-product">
+
+                        <a asp-controller="Home"
+                           asp-action="Details"
+                           asp-route-id="@product.Id"
+                           class="phone-product-image"
+                           aria-label="Xem @product.Name">
+
+                            <span class="phone-brand-tag">
+                                @product.Brand
+                            </span>
+
+                            @if (imagePath != null)
+                            {
+                                <img src="@Url.Content(imagePath)"
+                                     alt="@product.Name"
+                                     loading="lazy" />
+                            }
+                            else
+                            {
+                                <span class="phone-image-placeholder">
+                                    Chưa có hình ảnh
+                                </span>
+                            }
+                        </a>
+
+                        <div class="phone-product-body">
+                            <div class="phone-product-heading">
+                                <span class="phone-product-brand">
+                                    @product.Brand
+                                </span>
+
+                                <span class="phone-stock @(product.StockQuantity > 0
+                                                                        ? "phone-stock-available"
+                                                                        : "phone-stock-empty")">
+
+                                    @(product.StockQuantity > 0
+                                        ? "Còn hàng"
+                                        : "Hết hàng")
+                                </span>
+                            </div>
+
+                            <h3>
+                                <a asp-controller="Home"
+                                   asp-action="Details"
+                                   asp-route-id="@product.Id">
+                                    @product.Name
+                                </a>
+                            </h3>
+
+                            <div class="phone-specs">
+                                <span>RAM @product.RamGb GB</span>
+                                <span>@product.StorageGb GB</span>
+                            </div>
+
+                            <div class="phone-product-bottom">
+                                <div>
+                                    <span class="phone-price-label">
+                                        Giá bán
+                                    </span>
+
+                                    <strong class="phone-price">
+                                        @(product.Price.ToString("N0", culture)) ₫
+                                    </strong>
+                                </div>
+
+                                <a asp-controller="Home"
+                                   asp-action="Details"
+                                   asp-route-id="@product.Id"
+                                   class="phone-detail-button"
+                                   aria-label="Xem chi tiết @product.Name">
+                                    →
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+    </section>
+</div>

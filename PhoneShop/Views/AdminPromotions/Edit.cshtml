@@ -1,0 +1,220 @@
+﻿@model PhoneShop.ViewModels.PromotionViewModel
+
+@{
+    var creating = Model.Id == 0;
+    var title = creating ? "Tạo khuyến mãi" : "Sửa khuyến mãi";
+
+    ViewData["Title"] = title;
+}
+
+<a asp-controller="AdminPromotions"
+   asp-action="Index"
+   class="btn btn-outline-secondary mb-4">
+    ← Danh sách khuyến mãi
+</a>
+
+<h1 class="mb-2">@title</h1>
+
+<p class="text-muted mb-4">
+    Thiết lập mã giảm giá, điều kiện và thời gian áp dụng.
+</p>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-9">
+        <div class="card card-body p-4">
+            <form asp-controller="AdminPromotions"
+                  asp-action="@(creating ? "Create" : "Edit")"
+                  method="post">
+
+                <input asp-for="Id" type="hidden" />
+
+                <div asp-validation-summary="All"
+                     class="text-danger mb-3"
+                     role="alert"></div>
+
+                <h4 class="mb-3">Thông tin chương trình</h4>
+
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <label asp-for="Code"
+                               class="form-label"></label>
+
+                        <input asp-for="Code"
+                               class="form-control"
+                               maxlength="30"
+                               placeholder="Ví dụ: PHONE10"
+                               aria-describedby="codeHelp" />
+
+                        <span asp-validation-for="Code"
+                              class="text-danger small"></span>
+
+                        <div id="codeHelp" class="form-text">
+                            Chỉ dùng chữ không dấu, số, dấu _ hoặc -.
+                        </div>
+                    </div>
+
+                    <div class="col-md-7">
+                        <label asp-for="Name"
+                               class="form-label"></label>
+
+                        <input asp-for="Name"
+                               class="form-control"
+                               maxlength="150"
+                               placeholder="Ví dụ: Giảm 10% điện thoại" />
+
+                        <span asp-validation-for="Name"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Description"
+                               class="form-label"></label>
+
+                        <textarea asp-for="Description"
+                                  class="form-control"
+                                  rows="3"
+                                  maxlength="1000"
+                                  placeholder="Nhập mô tả chương trình"></textarea>
+
+                        <span asp-validation-for="Description"
+                              class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <h4 class="mb-3">Mức giảm và điều kiện</h4>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label asp-for="DiscountPercent"
+                               class="form-label"></label>
+
+                        <input asp-for="DiscountPercent"
+                               type="number"
+                               min="0.01"
+                               max="100"
+                               step="0.01"
+                               class="form-control" />
+
+                        <span asp-validation-for="DiscountPercent"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="MinimumOrderAmount"
+                               class="form-label"></label>
+
+                        <input asp-for="MinimumOrderAmount"
+                               type="number"
+                               min="0"
+                               step="1"
+                               class="form-control"
+                               aria-describedby="minimumHelp" />
+
+                        <span asp-validation-for="MinimumOrderAmount"
+                              class="text-danger small"></span>
+
+                        <div id="minimumHelp" class="form-text">
+                            Nhập 0 nếu không yêu cầu giá trị tối thiểu.
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="MaximumDiscountAmount"
+                               class="form-label"></label>
+
+                        <input asp-for="MaximumDiscountAmount"
+                               type="number"
+                               min="1"
+                               step="1"
+                               class="form-control"
+                               placeholder="Không giới hạn"
+                               aria-describedby="maximumHelp" />
+
+                        <span asp-validation-for="MaximumDiscountAmount"
+                              class="text-danger small"></span>
+
+                        <div id="maximumHelp" class="form-text">
+                            Để trống nếu không giới hạn số tiền giảm.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-light border small mt-3 mb-0">
+                    Ví dụ: đơn 15.000.000 ₫ được giảm 10%,
+                    nhưng giới hạn giảm tối đa 1.000.000 ₫,
+                    thì khách thanh toán 14.000.000 ₫.
+                </div>
+
+                <hr class="my-4" />
+
+                <h4 class="mb-3">Thời gian áp dụng</h4>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="StartsAt"
+                               class="form-label"></label>
+
+                        <input asp-for="StartsAt"
+                               type="datetime-local"
+                               asp-format="{0:yyyy-MM-ddTHH:mm}"
+                               class="form-control" />
+
+                        <span asp-validation-for="StartsAt"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="EndsAt"
+                               class="form-label"></label>
+
+                        <input asp-for="EndsAt"
+                               type="datetime-local"
+                               asp-format="{0:yyyy-MM-ddTHH:mm}"
+                               class="form-control" />
+
+                        <span asp-validation-for="EndsAt"
+                              class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <p class="text-muted small mt-2">
+                    Nhập theo giờ Việt Nam.
+                    Thời gian kết thúc phải sau thời gian bắt đầu.
+                </p>
+
+                <div class="form-check mb-4">
+                    <input asp-for="IsActive"
+                           class="form-check-input"
+                           aria-describedby="activeHelp" />
+
+                    <label asp-for="IsActive"
+                           class="form-check-label"></label>
+
+                    <div id="activeHelp" class="form-text">
+                        Mã chỉ sử dụng được khi chương trình được bật
+                        và đang trong thời gian áp dụng.
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 border-top pt-4">
+                    <button type="submit"
+                            class="btn btn-primary">
+                        @(creating ? "Tạo khuyến mãi" : "Lưu thay đổi")
+                    </button>
+
+                    <a asp-controller="AdminPromotions"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary">
+                        Quay lại
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,81 @@
+﻿@model PhoneShop.ViewModels.SurveyAnswerViewModel
+
+@{
+    ViewData["Title"] = "Trả lời khảo sát";
+}
+
+<a asp-controller="Surveys"
+   asp-action="Index"
+   class="btn btn-outline-secondary mb-4">
+    ← Danh sách khảo sát
+</a>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <h1 class="mb-2">Trả lời khảo sát</h1>
+
+        <p class="text-muted mb-4">
+            Chia sẻ ý kiến của bạn để PhoneShop cải thiện dịch vụ.
+        </p>
+
+        <div class="card card-body mb-4">
+            <h2 class="h4 mb-3 text-break">
+                @Model.Title
+            </h2>
+
+            <p class="fs-5 text-break mb-0"
+               style="white-space: pre-wrap">@Model.Question</p>
+        </div>
+
+        <div class="card card-body p-4">
+            <form asp-controller="Surveys"
+                  asp-action="Answer"
+                  method="post">
+
+                <input asp-for="SurveyId" type="hidden" />
+
+                <div asp-validation-summary="All"
+                     class="text-danger mb-3"
+                     role="alert"></div>
+
+                <div class="mb-4">
+                    <label asp-for="Answer"
+                           class="form-label"></label>
+
+                    <textarea asp-for="Answer"
+                              class="form-control"
+                              rows="7"
+                              maxlength="2000"
+                              placeholder="Nhập ý kiến của bạn..."
+                              aria-describedby="answerHelp"></textarea>
+
+                    <span asp-validation-for="Answer"
+                          class="text-danger small"></span>
+
+                    <div id="answerHelp" class="form-text">
+                        Tối đa 2.000 ký tự.
+                        Mỗi tài khoản chỉ được gửi một lần
+                        cho khảo sát này.
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 border-top pt-4">
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Gửi câu trả lời
+                    </button>
+
+                    <a asp-controller="Surveys"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary">
+                        Quay lại
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

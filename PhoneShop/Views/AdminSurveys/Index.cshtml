@@ -1,0 +1,160 @@
+﻿@model List<PhoneShop.ViewModels.AdminSurveyListViewModel>
+
+@{
+    ViewData["Title"] = "Quản lý khảo sát";
+
+    var activeCount = Model.Count(s => s.IsActive);
+    var closedCount = Model.Count(s => !s.IsActive);
+    var responseCount = Model.Sum(s => s.ResponseCount);
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="mb-2">Quản lý khảo sát</h1>
+
+        <p class="text-muted mb-0">
+            Tạo khảo sát và theo dõi ý kiến khách hàng.
+        </p>
+    </div>
+
+    <a asp-controller="AdminSurveys"
+       asp-action="Create"
+       class="btn btn-primary">
+        Tạo khảo sát
+    </a>
+</div>
+
+@if (TempData["SurveySuccess"] is string message)
+{
+    <div class="alert alert-success" role="status">
+        @message
+    </div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card card-body h-100">
+            <span class="text-muted">Tổng khảo sát</span>
+            <strong class="fs-3 mt-2">@Model.Count</strong>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="card card-body h-100">
+            <span class="text-muted">Đang mở</span>
+            <strong class="fs-3 mt-2 text-success">
+                @activeCount
+            </strong>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="card card-body h-100">
+            <span class="text-muted">Đã đóng</span>
+            <strong class="fs-3 mt-2 text-secondary">
+                @closedCount
+            </strong>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="card card-body h-100">
+            <span class="text-muted">Tổng lượt trả lời</span>
+            <strong class="fs-3 mt-2">@responseCount</strong>
+        </div>
+    </div>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="card card-body text-center py-5">
+        <h4>Chưa có khảo sát nào</h4>
+
+        <p class="text-muted">
+            Tạo khảo sát đầu tiên để thu thập ý kiến khách hàng.
+        </p>
+
+        <a asp-controller="AdminSurveys"
+           asp-action="Create"
+           class="btn btn-primary align-self-center">
+            Tạo khảo sát
+        </a>
+    </div>
+}
+else
+{
+    <div class="table-responsive mb-4">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Tiêu đề</th>
+                    <th>Trạng thái</th>
+                    <th class="text-center">Số câu trả lời</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var survey in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">
+                            @survey.Title
+                        </td>
+
+                        <td>
+                            <span class="badge @(survey.IsActive
+                                ? "bg-success"
+                                : "bg-secondary") px-3 py-2">
+                                @(survey.IsActive ? "Đang mở" : "Đã đóng")
+                            </span>
+                        </td>
+
+                        <td class="text-center fw-semibold">
+                            @survey.ResponseCount
+                        </td>
+
+                        <td class="text-end">
+                            <div class="d-flex flex-wrap justify-content-end gap-2">
+                                <a asp-controller="AdminSurveys"
+                                   asp-action="Results"
+                                   asp-route-id="@survey.Id"
+                                   class="btn btn-outline-primary btn-sm text-nowrap">
+                                    Xem kết quả
+                                </a>
+
+                                <form asp-controller="AdminSurveys"
+                                      asp-action="SetActive"
+                                      method="post"
+                                      class="m-0">
+
+                                    <input type="hidden"
+                                           name="id"
+                                           value="@survey.Id" />
+
+                                    <input type="hidden"
+                                           name="isActive"
+                                           value="@(survey.IsActive ? "false" : "true")" />
+
+                                    <button type="submit"
+                                            class="btn btn-sm text-nowrap @(survey.IsActive
+                                                ? "btn-outline-secondary"
+                                                : "btn-outline-success")">
+                                        @(survey.IsActive
+                                            ? "Đóng khảo sát"
+                                            : "Mở khảo sát")
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <p class="text-muted small">
+        Khảo sát đã đóng không nhận thêm câu trả lời.
+        Bạn vẫn có thể xem các kết quả đã lưu.
+    </p>
+}

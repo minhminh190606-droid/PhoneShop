@@ -1,0 +1,418 @@
+﻿@model PhoneShop.Models.Order
+
+@{
+    ViewData["Title"] = "Quản lý chi tiết đơn";
+
+    var culture =
+        System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
+
+    var status = Model.Status switch
+    {
+        PhoneShop.Models.OrderStatus.Pending => "Chờ xác nhận",
+        PhoneShop.Models.OrderStatus.Confirmed => "Đã xác nhận",
+        PhoneShop.Models.OrderStatus.Shipping => "Đang giao",
+        PhoneShop.Models.OrderStatus.Delivered => "Đã giao",
+        PhoneShop.Models.OrderStatus.Cancelled => "Đã hủy",
+        _ => "Không xác định"
+    };
+
+    var statusClass = Model.Status switch
+    {
+        PhoneShop.Models.OrderStatus.Pending =>
+            "bg-warning text-dark",
+        PhoneShop.Models.OrderStatus.Confirmed =>
+            "bg-primary",
+        PhoneShop.Models.OrderStatus.Shipping =>
+            "bg-info text-dark",
+        PhoneShop.Models.OrderStatus.Delivered =>
+            "bg-success",
+        _ => "bg-secondary"
+    };
+
+    var payment = Model.PaymentStatus switch
+    {
+        PhoneShop.Models.PaymentStatus.Paid => "Đã thanh toán",
+        PhoneShop.Models.PaymentStatus.Refunded => "Đã hoàn tiền",
+        _ => "Chưa thanh toán"
+    };
+
+    var paymentClass = Model.PaymentStatus switch
+    {
+        PhoneShop.Models.PaymentStatus.Paid => "bg-success",
+        PhoneShop.Models.PaymentStatus.Refunded => "bg-secondary",
+        _ => "bg-warning text-dark"
+    };
+
+    var paymentMethod = Model.PaymentMethod switch
+    {
+        PhoneShop.Models.PaymentMethod.CashOnDelivery =>
+            "Thanh toán khi nhận hàng",
+        PhoneShop.Models.PaymentMethod.BankTransfer =>
+            "Chuyển khoản ngân hàng",
+        _ => "Không xác định"
+    };
+
+    PhoneShop.Models.OrderStatus? nextStatus =
+        Model.Status switch
+        {
+            PhoneShop.Models.OrderStatus.Pending =>
+                PhoneShop.Models.OrderStatus.Confirmed,
+
+            PhoneShop.Models.OrderStatus.Confirmed =>
+                PhoneShop.Models.OrderStatus.Shipping,
+
+            PhoneShop.Models.OrderStatus.Shipping =>
+                PhoneShop.Models.OrderStatus.Delivered,
+
+            _ => null
+        };
+
+    var buttonLabel = Model.Status switch
+    {
+        PhoneShop.Models.OrderStatus.Pending =>
+            "Xác nhận đơn hàng",
+        PhoneShop.Models.OrderStatus.Confirmed =>
+            "Chuyển sang đang giao",
+        PhoneShop.Models.OrderStatus.Shipping =>
+            "Xác nhận đã giao",
+        _ => ""
+    };
+
+    var canConfirmPayment =
+        Model.PaymentMethod ==
+            PhoneShop.Models.PaymentMethod.BankTransfer &&
+        Model.PaymentStatus ==
+            PhoneShop.Models.PaymentStatus.Unpaid &&
+        (Model.Status == PhoneShop.Models.OrderStatus.Pending ||
+         Model.Status == PhoneShop.Models.OrderStatus.Confirmed);
+
+    var needsPaymentCollected =
+        Model.Status == PhoneShop.Models.OrderStatus.Shipping &&
+        Model.PaymentMethod ==
+            PhoneShop.Models.PaymentMethod.CashOnDelivery &&
+        Model.PaymentStatus ==
+            PhoneShop.Models.PaymentStatus.Unpaid;
+
+    var bankPaymentRequired =
+        Model.Status == PhoneShop.Models.OrderStatus.Confirmed &&
+        Model.PaymentMethod ==
+            PhoneShop.Models.PaymentMethod.BankTransfer &&
+        Model.PaymentStatus != PhoneShop.Models.PaymentStatus.Paid;
+}
+
+<a asp-controller="AdminOrders"
+   asp-action="Index"
+   class="btn btn-outline-secondary mb-4">
+    ← Danh sách đơn hàng
+</a>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="mb-2">Quản lý đơn #@Model.Id</h1>
+
+        <p class="text-muted mb-0">
+            Ngày đặt:
+            @(Model.CreatedAtUtc.AddHours(7).ToString("dd/MM/yyyy HH:mm"))
+            (giờ Việt Nam)
+        </p>
+    </div>
+
+    <span class="badge @statusClass fs-6 px-3 py-2">
+        @status
+    </span>
+</div>
+
+@if (TempData["AdminSuccess"] is string success)
+{
+    <div class="alert alert-success" role="status">
+        @success
+    </div>
+}
+
+@if (TempData["AdminError"] is string error)
+{
+    <div class="alert alert-danger" role="alert">
+        @error
+    </div>
+}
+
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card card-body h-100">
+            <h4 class="mb-3">Thông tin nhận hàng</h4>
+
+            <p>
+                <strong>Người nhận:</strong>
+                @Model.ReceiverName
+            </p>
+
+            <p>
+                <strong>Điện thoại:</strong>
+                @Model.PhoneNumber
+            </p>
+
+            <p class="text-break mb-0">
+                <strong>Địa chỉ:</strong>
+                @Model.ShippingAddress
+            </p>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card card-body h-100">
+            <h4 class="mb-3">Thông tin thanh toán</h4>
+
+            <p>
+                <strong>Phương thức:</strong>
+                @paymentMethod
+            </p>
+
+            <p>
+                <strong>Thanh toán:</strong>
+
+                <span class="badge @paymentClass ms-1">
+                    @payment
+                </span>
+            </p>
+
+            @if (!string.IsNullOrWhiteSpace(Model.PaymentReference))
+            {
+                <p class="text-break">
+                    <strong>Mã giao dịch:</strong>
+                    @Model.PaymentReference
+                </p>
+            }
+
+            @if (Model.PaidAtUtc.HasValue)
+            {
+                <p class="text-muted small mb-0">
+                    Xác nhận thanh toán:
+                    @(Model.PaidAtUtc.Value.AddHours(7).ToString("dd/MM/yyyy HH:mm"))
+                    (giờ Việt Nam)
+                </p>
+            }
+        </div>
+    </div>
+</div>
+
+<h4 class="mb-3">Sản phẩm trong đơn</h4>
+
+<div class="table-responsive mb-4">
+    <table class="table align-middle mb-0">
+        <thead>
+            <tr>
+                <th>Sản phẩm</th>
+                <th>Đơn giá</th>
+                <th class="text-center">Số lượng</th>
+                <th class="text-end">Thành tiền</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>
+                        <strong>@item.ProductName</strong>
+                    </td>
+
+                    <td class="text-nowrap">
+                        @(item.UnitPrice.ToString("N0", culture)) ₫
+                    </td>
+
+                    <td class="text-center">
+                        @item.Quantity
+                    </td>
+
+                    <td class="text-end text-nowrap fw-semibold">
+                        @((item.UnitPrice * item.Quantity).ToString("N0", culture)) ₫
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card card-body mb-4">
+            <h4 class="mb-3">Xử lý đơn hàng</h4>
+
+            <p>
+                Trạng thái hiện tại:
+                <strong>@status</strong>
+            </p>
+
+            @if (nextStatus.HasValue)
+            {
+                @if (bankPaymentRequired)
+                {
+                    <div class="alert alert-warning mb-0">
+                        Cần xác nhận đã nhận đủ tiền chuyển khoản
+                        trước khi chuyển đơn sang đang giao.
+                    </div>
+                }
+                else
+                {
+                    <form asp-controller="AdminOrders"
+                          asp-action="UpdateStatus"
+                          method="post">
+
+                        <input type="hidden"
+                               name="id"
+                               value="@Model.Id" />
+
+                        <input type="hidden"
+                               name="nextStatus"
+                               value="@nextStatus.Value" />
+
+                        @if (needsPaymentCollected)
+                        {
+                            <div class="form-check mb-3">
+                                <input type="checkbox"
+                                       id="paymentCollected"
+                                       name="paymentCollected"
+                                       value="true"
+                                       class="form-check-input"
+                                       required />
+
+                                <label for="paymentCollected"
+                                       class="form-check-label">
+                                    Đã thu đủ tiền từ khách hàng
+                                </label>
+                            </div>
+                        }
+
+                        <button type="submit"
+                                class="btn btn-success">
+                            @buttonLabel
+                        </button>
+                    </form>
+                }
+            }
+            else
+            {
+                <p class="text-muted mb-0">
+                    Đơn đã hoàn tất hoặc đã hủy,
+                    không chuyển trạng thái tiếp.
+                </p>
+            }
+        </div>
+
+        @if (canConfirmPayment)
+        {
+            <div class="card card-body mb-4">
+                <h4 class="mb-3">Xác nhận tiền chuyển khoản</h4>
+
+                <p class="text-muted small">
+                    Đối chiếu giao dịch ngân hàng trước khi xác nhận.
+                    Số tiền phải khớp tổng tiền sau giảm của đơn.
+                </p>
+
+                <form asp-controller="AdminOrders"
+                      asp-action="ConfirmPayment"
+                      method="post">
+
+                    <input type="hidden"
+                           name="OrderId"
+                           value="@Model.Id" />
+
+                    <div class="mb-3">
+                        <label for="paymentReference"
+                               class="form-label">
+                            Mã giao dịch ngân hàng
+                        </label>
+
+                        <input id="paymentReference"
+                               name="Reference"
+                               maxlength="100"
+                               class="form-control"
+                               placeholder="Nhập mã giao dịch đã đối chiếu"
+                               required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="paymentAmount"
+                               class="form-label">
+                            Số tiền thực nhận (đồng)
+                        </label>
+
+                        <input id="paymentAmount"
+                               name="Amount"
+                               type="number"
+                               min="1"
+                               step="0.01"
+                               class="form-control"
+                               required />
+
+                        <div class="form-text">
+                            Tổng tiền đơn:
+                            @(Model.TotalAmount.ToString("N0", culture)) ₫
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input id="paymentVerified"
+                               name="Verified"
+                               type="checkbox"
+                               value="true"
+                               class="form-check-input"
+                               required />
+
+                        <label for="paymentVerified"
+                               class="form-check-label">
+                            Tôi đã đối chiếu giao dịch ngân hàng:
+                            đúng đơn hàng và đủ số tiền.
+                        </label>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Xác nhận đã nhận tiền
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card card-body mb-4">
+            <h4 class="mb-3">Tổng tiền đơn hàng</h4>
+
+            <div class="d-flex justify-content-between gap-3 mb-3">
+                <span>Tổng trước giảm</span>
+
+                <strong class="text-nowrap">
+                    @(Model.Subtotal.ToString("N0", culture)) ₫
+                </strong>
+            </div>
+
+            @if (Model.DiscountAmount > 0)
+            {
+                <div class="d-flex justify-content-between gap-3 mb-3">
+                    <span>Mã khuyến mãi</span>
+
+                    <strong class="text-break">
+                        @Model.PromotionCode
+                    </strong>
+                </div>
+            }
+
+            <div class="d-flex justify-content-between gap-3 text-success mb-3">
+                <span>Giảm giá</span>
+
+                <strong class="text-nowrap">
+                    −@(Model.DiscountAmount.ToString("N0", culture)) ₫
+                </strong>
+            </div>
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 border-top pt-3">
+                <strong>Tổng tiền sau giảm</strong>
+
+                <strong class="text-danger fs-4 text-nowrap">
+                    @(Model.TotalAmount.ToString("N0", culture)) ₫
+                </strong>
+            </div>
+        </div>
+    </div>
+</div>

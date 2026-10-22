@@ -1,0 +1,247 @@
+﻿@model PhoneShop.ViewModels.ProductDetailsViewModel
+
+@{
+    var product = Model.Product;
+    ViewData["Title"] = product.Name;
+
+    var culture =
+        System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
+
+    var imageUrl = product.ImageUrl;
+
+    if (string.IsNullOrWhiteSpace(imageUrl))
+    {
+        imageUrl = product.Name switch
+        {
+            "iPhone 15" => "~/images/iphone15.jfif",
+            "Samsung Galaxy S24" => "~/images/samsung-s24.jfif",
+            "Xiaomi Redmi Note 13" => "~/images/xiaomi-note13.jfif",
+            _ => null
+        };
+    }
+}
+
+<a asp-controller="Home"
+   asp-action="Index"
+   class="btn btn-outline-secondary mb-4">
+    ← Về trang chủ
+</a>
+
+<div class="row g-4">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="product-detail-image-box">
+                @if (!string.IsNullOrWhiteSpace(imageUrl))
+                {
+                    <img src="@Url.Content(imageUrl)"
+                         alt="@product.Name"
+                         class="product-detail-image" />
+                }
+                else
+                {
+                    <span class="text-muted">Chưa có ảnh</span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <p class="text-muted mb-1">@product.Brand</p>
+
+        <h1>@product.Name</h1>
+
+        <p class="text-danger fs-3 fw-bold">
+            @(product.Price.ToString("N0", culture)) ₫
+        </p>
+
+        <div class="table-responsive">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th>Hãng</th>
+                        <td>@product.Brand</td>
+                    </tr>
+                    <tr>
+                        <th>RAM</th>
+                        <td>@product.RamGb GB</td>
+                    </tr>
+                    <tr>
+                        <th>Bộ nhớ</th>
+                        <td>@product.StorageGb GB</td>
+                    </tr>
+                    <tr>
+                        <th>Chip xử lý</th>
+                        <td>@product.Chipset</td>
+                    </tr>
+                    <tr>
+                        <th>Tình trạng</th>
+                        <td class="@(product.StockQuantity > 0
+                            ? "text-success"
+                            : "text-secondary")">
+                            @(product.StockQuantity > 0
+                                ? "Còn hàng"
+                                : "Hết hàng")
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h4 class="mt-4">Mô tả</h4>
+
+        <p style="white-space: pre-wrap">@product.Description</p>
+
+        @if (product.StockQuantity > 0)
+        {
+            <form asp-controller="Cart"
+                  asp-action="Add"
+                  method="post"
+                  class="mt-4">
+
+                <input type="hidden"
+                       name="productId"
+                       value="@product.Id" />
+
+                <button type="submit"
+                        class="btn btn-primary">
+                    Thêm vào giỏ hàng
+                </button>
+            </form>
+        }
+        else
+        {
+            <button type="button"
+                    class="btn btn-secondary mt-4"
+                    disabled>
+                Hết hàng
+            </button>
+        }
+    </div>
+</div>
+
+<hr class="my-5" />
+
+<h2 class="mb-3">
+    Đánh giá sản phẩm (@Model.Reviews.Count)
+</h2>
+
+@if (TempData["ReviewSuccess"] is string success)
+{
+    <div class="alert alert-success">@success</div>
+}
+
+@if (TempData["ReviewError"] is string error)
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+@if (Model.Reviews.Count > 0)
+{
+    <p>
+        Điểm trung bình:
+        <strong>
+            @(Model.Reviews.Average(r => r.Rating).ToString("0.0", culture))
+            / 5
+        </strong>
+    </p>
+}
+
+@if (Model.CanReview)
+{
+    <form asp-controller="Reviews"
+          asp-action="Create"
+          method="post"
+          class="card card-body mb-4">
+
+        <input type="hidden"
+               name="ProductId"
+               value="@product.Id" />
+
+        <div class="mb-3">
+            <label for="rating" class="form-label">
+                Điểm đánh giá
+            </label>
+
+            <select id="rating"
+                    name="Rating"
+                    class="form-select"
+                    required>
+                <option value="">-- Chọn số sao --</option>
+                <option value="5">5 sao</option>
+                <option value="4">4 sao</option>
+                <option value="3">3 sao</option>
+                <option value="2">2 sao</option>
+                <option value="1">1 sao</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="comment" class="form-label">
+                Nhận xét
+            </label>
+
+            <textarea id="comment"
+                      name="Comment"
+                      class="form-control"
+                      rows="3"
+                      maxlength="2000"
+                      required></textarea>
+        </div>
+
+        <button type="submit"
+                class="btn btn-primary align-self-start">
+            Gửi đánh giá
+        </button>
+    </form>
+}
+else if (Model.HasReviewed)
+{
+    <p class="text-success">
+        Bạn đã đánh giá sản phẩm này.
+    </p>
+}
+else if (User.Identity?.IsAuthenticated != true)
+{
+    <p>
+        Vui lòng
+        <a asp-controller="Account"
+           asp-action="Login">
+            đăng nhập
+        </a>
+        để kiểm tra quyền đánh giá.
+    </p>
+}
+else
+{
+    <p class="text-muted">
+        Bạn có thể đánh giá sau khi đơn chứa sản phẩm này
+        được giao thành công.
+    </p>
+}
+
+@if (Model.Reviews.Count == 0)
+{
+    <div class="alert alert-light border">
+        Chưa có đánh giá nào.
+    </div>
+}
+
+@foreach (var review in Model.Reviews)
+{
+    <div class="card card-body mb-3">
+        <div>
+            <strong>@review.FullName</strong>
+
+            <span class="ms-2 text-warning">
+                @review.Rating / 5 sao
+            </span>
+        </div>
+
+        <div class="text-muted small mt-1">
+            @(review.CreatedAtUtc.AddHours(7).ToString("dd/MM/yyyy HH:mm"))
+        </div>
+
+        <p class="mt-2 mb-0"
+           style="white-space: pre-wrap">@review.Comment</p>
+    </div>
+}

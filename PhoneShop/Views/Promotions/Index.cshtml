@@ -1,0 +1,133 @@
+﻿@model List<PhoneShop.Models.Promotion>
+
+@{
+    ViewData["Title"] = "Khuyến mãi";
+
+    var culture =
+        System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="mb-2">Chương trình khuyến mãi</h1>
+
+        <p class="text-muted mb-0">
+            Chọn mã phù hợp để tiết kiệm khi mua điện thoại.
+        </p>
+    </div>
+
+    <a asp-controller="Home"
+       asp-action="Index"
+       class="btn btn-outline-primary">
+        Xem điện thoại
+    </a>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="card card-body text-center py-5">
+        <h4>Chưa có khuyến mãi đang áp dụng</h4>
+
+        <p class="text-muted">
+            Bạn có thể quay lại sau để xem các ưu đãi mới.
+        </p>
+
+        <a asp-controller="Home"
+           asp-action="Index"
+           class="btn btn-primary align-self-center">
+            Tiếp tục mua sắm
+        </a>
+    </div>
+}
+else
+{
+    <p class="text-muted mb-3">
+        Có @Model.Count chương trình đang áp dụng.
+    </p>
+
+    <div class="row g-4">
+        @foreach (var promotion in Model)
+        {
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3">
+                            <span class="badge bg-success px-3 py-2">
+                                Đang áp dụng
+                            </span>
+                        </div>
+
+                        <h2 class="h5 mb-3">
+                            @promotion.Name
+                        </h2>
+
+                        <p class="fs-2 text-danger fw-bold mb-3">
+                            Giảm @(promotion.DiscountPercent.ToString("0.##", culture))%
+                        </p>
+
+                        <div class="border rounded bg-light p-3 mb-3">
+                            <div class="text-muted small mb-1">
+                                Mã khuyến mãi
+                            </div>
+
+                            <strong class="fs-5 text-break"
+                                    style="color: var(--shop-primary);">
+                                @promotion.Code
+                            </strong>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(promotion.Description))
+                        {
+                            <p class="text-muted"
+                               style="white-space: pre-wrap">@promotion.Description</p>
+                        }
+
+                        <div class="mb-2">
+                            <span>Đơn tối thiểu:</span>
+
+                            <strong>
+                                @(promotion.MinimumOrderAmount.ToString("N0", culture)) ₫
+                            </strong>
+                        </div>
+
+                        <div class="mb-3">
+                            @if (promotion.MaximumDiscountAmount.HasValue)
+                            {
+                                <span>Giảm tối đa:</span>
+
+                                <strong>
+                                    @(promotion.MaximumDiscountAmount.Value.ToString("N0", culture)) ₫
+                                </strong>
+                            }
+                            else
+                            {
+                                <span>Không giới hạn mức giảm tối đa.</span>
+                            }
+                        </div>
+
+                        <p class="text-muted small">
+                            Hết hạn:
+                            @(promotion.EndsAtUtc.AddHours(7).ToString("dd/MM/yyyy HH:mm"))
+                            (giờ Việt Nam)
+                        </p>
+
+                        <div class="mt-auto pt-2">
+                            <a asp-controller="Orders"
+                               asp-action="Checkout"
+                               asp-route-promotionCode="@promotion.Code"
+                               class="btn btn-primary w-100">
+                                Dùng mã
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <p class="text-muted small mt-4">
+        Thêm sản phẩm vào giỏ trước khi dùng mã.
+        Mức giảm được tính theo giá trị đơn hàng và điều kiện
+        của chương trình ở bước đặt hàng.
+    </p>
+}

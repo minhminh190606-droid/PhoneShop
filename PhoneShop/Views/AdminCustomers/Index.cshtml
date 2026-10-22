@@ -1,0 +1,154 @@
+﻿@model List<PhoneShop.ViewModels.CustomerClassificationViewModel>
+
+@{
+    ViewData["Title"] = "Phân loại khách hàng";
+
+    var culture =
+        System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
+
+    var bronzeCount = Model.Count(c => c.Tier == "Đồng");
+    var silverCount = Model.Count(c => c.Tier == "Bạc");
+    var goldCount = Model.Count(c => c.Tier == "Vàng");
+}
+
+<h1 class="mb-2">Phân loại khách hàng</h1>
+
+<p class="text-muted mb-4">
+    Theo dõi chi tiêu và hạng khách hàng theo các đơn hoàn thành.
+</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card card-body h-100">
+            <span class="text-muted">Tổng tài khoản</span>
+            <strong class="fs-3 mt-2">@Model.Count</strong>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="card card-body h-100">
+            <span class="text-muted">Hạng Đồng</span>
+            <strong class="fs-3 mt-2">@bronzeCount</strong>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="card card-body h-100">
+            <span class="text-muted">Hạng Bạc</span>
+            <strong class="fs-3 mt-2">@silverCount</strong>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="card card-body h-100">
+            <span class="text-muted">Hạng Vàng</span>
+            <strong class="fs-3 mt-2">@goldCount</strong>
+        </div>
+    </div>
+</div>
+
+<div class="card card-body mb-4">
+    <h4 class="mb-3">Quy tắc phân hạng</h4>
+
+    <p class="text-muted">
+        Chỉ tính đơn đã giao và đã thanh toán.
+        Tổng chi tiêu là số tiền sau giảm giá.
+    </p>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="border rounded p-3 h-100">
+                <span class="badge bg-dark px-3 py-2 mb-2">
+                    Đồng
+                </span>
+
+                <div>Dưới 20.000.000 ₫</div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="border rounded p-3 h-100">
+                <span class="badge bg-secondary px-3 py-2 mb-2">
+                    Bạc
+                </span>
+
+                <div>
+                    Từ 20.000.000 ₫ đến dưới 50.000.000 ₫
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="border rounded p-3 h-100">
+                <span class="badge bg-warning text-dark px-3 py-2 mb-2">
+                    Vàng
+                </span>
+
+                <div>Từ 50.000.000 ₫ trở lên</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="card card-body text-center py-5">
+        <h4>Chưa có tài khoản nào</h4>
+
+        <p class="text-muted mb-0">
+            Danh sách phân hạng sẽ xuất hiện khi có tài khoản.
+        </p>
+    </div>
+}
+else
+{
+    <div class="table-responsive mb-4">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th class="text-center">Đơn hoàn thành</th>
+                    <th class="text-end">Tổng chi tiêu</th>
+                    <th class="text-center">Hạng</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var customer in Model)
+                {
+                    var badge = customer.Tier switch
+                    {
+                        "Vàng" => "bg-warning text-dark",
+                        "Bạc" => "bg-secondary",
+                        _ => "bg-dark"
+                    };
+
+                    <tr>
+                        <td class="fw-semibold">
+                            @customer.FullName
+                        </td>
+
+                        <td class="text-break">
+                            @customer.Email
+                        </td>
+
+                        <td class="text-center">
+                            @customer.CompletedOrderCount
+                        </td>
+
+                        <td class="text-end text-nowrap fw-semibold">
+                            @(customer.TotalSpent.ToString("N0", culture)) ₫
+                        </td>
+
+                        <td class="text-center">
+                            <span class="badge @badge px-3 py-2">
+                                @customer.Tier
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

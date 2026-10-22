@@ -1,0 +1,234 @@
+﻿@model List<PhoneShop.Models.Promotion>
+
+@{
+    ViewData["Title"] = "Quản lý khuyến mãi";
+
+    var now = DateTime.UtcNow;
+
+    var culture =
+        System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
+
+    var applyingCount = Model.Count(p =>
+        p.IsActive &&
+        p.StartsAtUtc <= now &&
+        p.EndsAtUtc > now);
+
+    var upcomingCount = Model.Count(p =>
+        p.IsActive &&
+        p.StartsAtUtc > now);
+
+    var expiredCount = Model.Count(p =>
+        p.EndsAtUtc <= now);
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="mb-2">Quản lý khuyến mãi</h1>
+
+        <p class="text-muted mb-0">
+            Tạo chương trình và quản lý thời gian áp dụng mã.
+        </p>
+    </div>
+
+    <a asp-controller="AdminPromotions"
+       asp-action="Create"
+       class="btn btn-primary">
+        Tạo khuyến mãi
+    </a>
+</div>
+
+@if (TempData["PromotionSuccess"] is string message)
+{
+    <div class="alert alert-success" role="status">
+        @message
+    </div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card card-body h-100">
+            <span class="text-muted">Tổng chương trình</span>
+            <strong class="fs-3 mt-2">@Model.Count</strong>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="card card-body h-100">
+            <span class="text-muted">Đang áp dụng</span>
+            <strong class="fs-3 mt-2 text-success">
+                @applyingCount
+            </strong>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="card card-body h-100">
+            <span class="text-muted">Sắp bắt đầu</span>
+            <strong class="fs-3 mt-2">@upcomingCount</strong>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="card card-body h-100">
+            <span class="text-muted">Đã qua ngày kết thúc</span>
+            <strong class="fs-3 mt-2 text-secondary">
+                @expiredCount
+            </strong>
+        </div>
+    </div>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="card card-body text-center py-5">
+        <h4>Chưa có chương trình khuyến mãi</h4>
+
+        <p class="text-muted">
+            Tạo chương trình đầu tiên để khách sử dụng khi đặt hàng.
+        </p>
+
+        <a asp-controller="AdminPromotions"
+           asp-action="Create"
+           class="btn btn-primary align-self-center">
+            Tạo khuyến mãi
+        </a>
+    </div>
+}
+else
+{
+    <div class="table-responsive mb-4">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Mã</th>
+                    <th>Chương trình</th>
+                    <th>Ưu đãi</th>
+                    <th>Thời gian (giờ Việt Nam)</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    var status = !p.IsActive
+                        ? "Đã tắt"
+                        : now < p.StartsAtUtc
+                            ? "Chưa bắt đầu"
+                            : now >= p.EndsAtUtc
+                                ? "Đã hết hạn"
+                                : "Đang áp dụng";
+
+                    var statusClass = !p.IsActive
+                        ? "bg-secondary"
+                        : now < p.StartsAtUtc
+                            ? "bg-info text-dark"
+                            : now >= p.EndsAtUtc
+                                ? "bg-warning text-dark"
+                                : "bg-success";
+
+                    <tr>
+                        <td>
+                            <strong class="text-nowrap">
+                                @p.Code
+                            </strong>
+                        </td>
+
+                        <td>
+                            <strong>@p.Name</strong>
+
+                            @if (!string.IsNullOrWhiteSpace(p.Description))
+                            {
+                                <div class="text-muted small mt-1 text-break"
+                                     style="white-space: pre-wrap">
+                                    @p.Description
+                                </div>
+                            }
+                        </td>
+
+                        <td>
+                            <div class="fw-bold text-danger text-nowrap">
+                                Giảm @(p.DiscountPercent.ToString("0.##", culture))%
+                            </div>
+
+                            <div class="text-muted small mt-1 text-nowrap">
+                                Đơn từ:
+                                @(p.MinimumOrderAmount.ToString("N0", culture)) ₫
+                            </div>
+
+                            <div class="text-muted small">
+                                @if (p.MaximumDiscountAmount.HasValue)
+                                {
+                                    <span class="text-nowrap">
+                                        Tối đa:
+                                        @(p.MaximumDiscountAmount.Value.ToString("N0", culture)) ₫
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>Không giới hạn mức giảm</span>
+                                }
+                            </div>
+                        </td>
+
+                        <td class="text-nowrap small">
+                            <div>
+                                Từ:
+                                @(p.StartsAtUtc.AddHours(7).ToString("dd/MM/yyyy HH:mm"))
+                            </div>
+
+                            <div class="mt-1">
+                                Đến:
+                                @(p.EndsAtUtc.AddHours(7).ToString("dd/MM/yyyy HH:mm"))
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="badge @statusClass px-3 py-2">
+                                @status
+                            </span>
+                        </td>
+
+                        <td class="text-end">
+                            <div class="d-flex justify-content-end gap-2">
+                                <a asp-controller="AdminPromotions"
+                                   asp-action="Edit"
+                                   asp-route-id="@p.Id"
+                                   class="btn btn-sm btn-outline-primary">
+                                    Sửa
+                                </a>
+
+                                <form asp-controller="AdminPromotions"
+                                      asp-action="SetActive"
+                                      method="post"
+                                      class="m-0">
+
+                                    <input type="hidden"
+                                           name="id"
+                                           value="@p.Id" />
+
+                                    <input type="hidden"
+                                           name="isActive"
+                                           value="@(p.IsActive ? "false" : "true")" />
+
+                                    <button type="submit"
+                                            class="btn btn-sm @(p.IsActive
+                                                                                        ? "btn-outline-secondary"
+                                                                                        : "btn-outline-success")">
+                                        @(p.IsActive ? "Tắt" : "Bật")
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <p class="text-muted small">
+        Bật chương trình chỉ cho phép áp dụng mã trong thời gian
+        bắt đầu và kết thúc đã thiết lập.
+    </p>
+}

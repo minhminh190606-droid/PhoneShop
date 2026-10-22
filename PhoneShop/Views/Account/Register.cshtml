@@ -1,0 +1,140 @@
+﻿@model PhoneShop.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Đăng ký";
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-12 col-md-8 col-lg-5">
+        <div class="text-center mb-4">
+            <a asp-controller="Home"
+               asp-action="Index"
+               class="fs-3 fw-bold text-decoration-none"
+               style="color: var(--shop-primary);">
+                PhoneShop
+            </a>
+
+            <p class="text-muted mt-2 mb-0">
+                Tạo tài khoản để mua sắm và quản lý đơn hàng.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-body p-4">
+                <h1 class="fs-3 text-center mb-4">
+                    Đăng ký tài khoản
+                </h1>
+
+                @if (TempData["Success"] is string message)
+                {
+                    <div class="alert alert-success" role="status">
+                        @message
+
+                        <a asp-controller="Home"
+                           asp-action="Index"
+                           class="alert-link">
+                            Về trang chủ
+                        </a>
+                    </div>
+                }
+
+                <form asp-controller="Account"
+                      asp-action="Register"
+                      method="post">
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger mb-3"
+                         role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="FullName"
+                               class="form-label"></label>
+
+                        <input asp-for="FullName"
+                               class="form-control"
+                               autocomplete="name"
+                               placeholder="Nhập họ và tên" />
+
+                        <span asp-validation-for="FullName"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email"
+                               class="form-label"></label>
+
+                        <input asp-for="Email"
+                               type="email"
+                               class="form-control"
+                               autocomplete="email"
+                               placeholder="Nhập địa chỉ email" />
+
+                        <span asp-validation-for="Email"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password"
+                               class="form-label"></label>
+
+                        <input asp-for="Password"
+                               type="password"
+                               class="form-control"
+                               autocomplete="new-password"
+                               aria-describedby="passwordHelp"
+                               placeholder="Tạo mật khẩu" />
+
+                        <span asp-validation-for="Password"
+                              class="text-danger small"></span>
+
+                        <div id="passwordHelp" class="form-text">
+                            Mật khẩu từ 8 ký tự, có chữ hoa,
+                            chữ thường, chữ số và ký tự đặc biệt.
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="ConfirmPassword"
+                               class="form-label"></label>
+
+                        <input asp-for="ConfirmPassword"
+                               type="password"
+                               class="form-control"
+                               autocomplete="new-password"
+                               placeholder="Nhập lại mật khẩu" />
+
+                        <span asp-validation-for="ConfirmPassword"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary w-100">
+                        Đăng ký
+                    </button>
+
+                    <p class="text-center mt-4 mb-0">
+                        Đã có tài khoản?
+
+                        <a asp-controller="Account"
+                           asp-action="Login"
+                           class="fw-semibold">
+                            Đăng nhập
+                        </a>
+                    </p>
+                </form>
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <a asp-controller="Home"
+               asp-action="Index"
+               class="text-muted text-decoration-none">
+                ← Về trang chủ
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

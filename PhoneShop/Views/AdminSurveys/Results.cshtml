@@ -1,0 +1,75 @@
+﻿@model PhoneShop.Models.Survey
+
+@{
+    ViewData["Title"] = "Kết quả khảo sát";
+}
+
+<a asp-controller="AdminSurveys"
+   asp-action="Index"
+   class="btn btn-outline-secondary mb-4">
+    ← Danh sách khảo sát
+</a>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="mb-2">Kết quả khảo sát</h1>
+
+        <p class="text-muted mb-0">
+            Xem các ý kiến khách hàng đã gửi.
+        </p>
+    </div>
+
+    <span class="badge @(Model.IsActive
+        ? "bg-success"
+        : "bg-secondary") fs-6 px-3 py-2">
+        @(Model.IsActive ? "Đang mở" : "Đã đóng")
+    </span>
+</div>
+
+<div class="card card-body mb-4">
+    <h2 class="h4 mb-3 text-break">@Model.Title</h2>
+
+    <p class="fs-5 text-break"
+       style="white-space: pre-wrap">@Model.Question</p>
+
+    <div class="border-top pt-3 mt-2">
+        Tổng số câu trả lời:
+        <strong>@Model.Responses.Count</strong>
+    </div>
+</div>
+
+<h3 class="h5 mb-3">Câu trả lời của khách hàng</h3>
+
+@if (Model.Responses.Count == 0)
+{
+    <div class="card card-body text-center py-5">
+        <h4>Chưa có người trả lời</h4>
+
+        <p class="text-muted mb-0">
+            Các ý kiến sẽ xuất hiện tại đây khi khách gửi câu trả lời.
+        </p>
+    </div>
+}
+else
+{
+    @foreach (var response in Model.Responses
+        .OrderByDescending(r => r.CreatedAtUtc)
+        .ThenByDescending(r => r.Id))
+    {
+        <div class="card card-body mb-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                <strong class="text-break">
+                    @response.User.FullName
+                </strong>
+
+                <span class="text-muted small">
+                    @(response.CreatedAtUtc.AddHours(7).ToString("dd/MM/yyyy HH:mm"))
+                    (giờ Việt Nam)
+                </span>
+            </div>
+
+            <p class="border-top pt-3 mt-3 mb-0 text-break"
+               style="white-space: pre-wrap">@response.Answer</p>
+        </div>
+    }
+}

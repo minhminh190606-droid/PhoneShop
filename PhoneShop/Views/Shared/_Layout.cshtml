@@ -1,0 +1,257 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - PhoneShop</title>
+
+    <script type="importmap"></script>
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/PhoneShop.styles.css"
+          asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm mb-4">
+            <div class="container">
+                <a class="navbar-brand fw-bold text-primary"
+                   asp-area=""
+                   asp-controller="Home"
+                   asp-action="Index">
+                    PhoneShop
+                </a>
+
+                <button class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#mainNavbar"
+                        aria-controls="mainNavbar"
+                        aria-expanded="false"
+                        aria-label="Mở menu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse"
+                     id="mainNavbar">
+
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark text-nowrap"
+                               asp-area=""
+                               asp-controller="Home"
+                               asp-action="Index">
+                                Trang chủ
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link text-dark text-nowrap"
+                               asp-area=""
+                               asp-controller="Promotions"
+                               asp-action="Index">
+                                Khuyến mãi
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link text-dark text-nowrap"
+                               asp-area=""
+                               asp-controller="Cart"
+                               asp-action="Index">
+                                Giỏ hàng
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link text-dark text-nowrap"
+                               asp-area=""
+                               asp-controller="Surveys"
+                               asp-action="Index">
+                                Khảo sát
+                            </a>
+                        </li>
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item dropdown">
+                                <button class="nav-link dropdown-toggle text-danger text-nowrap"
+                                        id="adminDropdown"
+                                        type="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    Quản trị
+                                </button>
+
+                                <ul class="dropdown-menu"
+                                    aria-labelledby="adminDropdown">
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-area=""
+                                           asp-controller="AdminOrders"
+                                           asp-action="Index">
+                                            Quản lý đơn hàng
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-area=""
+                                           asp-controller="AdminUsers"
+                                           asp-action="Index">
+                                            Quản lý tài khoản
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-area=""
+                                           asp-controller="AdminPromotions"
+                                           asp-action="Index">
+                                            Quản lý khuyến mãi
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-area=""
+                                           asp-controller="AdminCustomers"
+                                           asp-action="Index">
+                                            Phân loại khách hàng
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-area=""
+                                           asp-controller="AdminSurveys"
+                                           asp-action="Index">
+                                            Quản lý khảo sát
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+
+                    <ul class="navbar-nav ms-auto">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item dropdown">
+                                <button class="nav-link dropdown-toggle text-dark text-nowrap"
+                                        id="accountDropdown"
+                                        type="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    Tài khoản
+                                </button>
+
+                                <ul class="dropdown-menu dropdown-menu-lg-end"
+                                    aria-labelledby="accountDropdown">
+                                    <li>
+                                        <span class="dropdown-item-text small text-muted text-break">
+                                            @User.Identity?.Name
+                                        </span>
+                                    </li>
+
+                                    <li>
+                                        <hr class="dropdown-divider" />
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-area=""
+                                           asp-controller="Account"
+                                           asp-action="Profile">
+                                            Hồ sơ cá nhân
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-area=""
+                                           asp-controller="Orders"
+                                           asp-action="Index">
+                                            Đơn hàng của tôi
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <hr class="dropdown-divider" />
+                                    </li>
+
+                                    <li>
+                                        <form asp-area=""
+                                              asp-controller="Account"
+                                              asp-action="Logout"
+                                              method="post">
+                                            <button type="submit"
+                                                    class="dropdown-item text-danger">
+                                                Đăng xuất
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark text-nowrap"
+                                   asp-area=""
+                                   asp-controller="Account"
+                                   asp-action="Register">
+                                    Đăng ký
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-primary fw-semibold text-nowrap"
+                                   asp-area=""
+                                   asp-controller="Account"
+                                   asp-action="Login">
+                                    Đăng nhập
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2026 - PhoneShop -
+            <a asp-area=""
+               asp-controller="Home"
+               asp-action="Privacy">
+                Chính sách bảo mật
+            </a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="~/js/site.js"
+            asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

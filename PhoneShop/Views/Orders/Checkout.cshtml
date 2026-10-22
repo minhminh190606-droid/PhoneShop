@@ -1,0 +1,266 @@
+﻿@model PhoneShop.ViewModels.CheckoutViewModel
+
+@{
+    ViewData["Title"] = "Xác nhận đặt hàng";
+
+    var culture =
+        System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
+}
+
+<h1 class="mb-2">Xác nhận đặt hàng</h1>
+
+<p class="text-muted mb-4">
+    Kiểm tra sản phẩm và thông tin nhận hàng trước khi xác nhận.
+</p>
+
+<div asp-validation-summary="All"
+     class="text-danger mb-3"></div>
+
+<div class="card card-body mb-4">
+    <form asp-controller="Orders"
+          asp-action="Checkout"
+          method="get">
+
+        <label for="promotionCode" class="form-label">
+            Mã khuyến mãi
+        </label>
+
+        <div class="d-flex flex-wrap gap-2">
+            <input id="promotionCode"
+                   name="promotionCode"
+                   value="@Model.PromotionCode"
+                   maxlength="30"
+                   class="form-control"
+                   style="flex: 1 1 200px; width: auto;"
+                   placeholder="Nhập mã, ví dụ PHONE10" />
+
+            <button type="submit"
+                    class="btn btn-outline-primary text-nowrap">
+                Áp dụng mã
+            </button>
+
+            <a asp-controller="Orders"
+               asp-action="Checkout"
+               class="btn btn-outline-secondary text-nowrap">
+                Bỏ mã
+            </a>
+        </div>
+
+        <p class="text-muted small mt-2 mb-0">
+            Áp dụng mã trước khi điền thông tin nhận hàng.
+            Đổi hoặc bỏ mã sẽ tải lại thông tin từ hồ sơ.
+        </p>
+    </form>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card card-body">
+            <h4 class="mb-4">Thông tin nhận hàng</h4>
+
+            <form asp-controller="Orders"
+                  asp-action="Checkout"
+                  method="post">
+
+                <input asp-for="PromotionCode" type="hidden" />
+
+                <div class="mb-3">
+                    <label asp-for="ReceiverName"
+                           class="form-label"></label>
+
+                    <input asp-for="ReceiverName"
+                           class="form-control"
+                           autocomplete="name"
+                           placeholder="Nhập họ tên người nhận" />
+
+                    <span asp-validation-for="ReceiverName"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="PhoneNumber"
+                           class="form-label"></label>
+
+                    <input asp-for="PhoneNumber"
+                           class="form-control"
+                           autocomplete="tel"
+                           inputmode="tel"
+                           placeholder="Nhập số điện thoại" />
+
+                    <span asp-validation-for="PhoneNumber"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ShippingAddress"
+                           class="form-label"></label>
+
+                    <textarea asp-for="ShippingAddress"
+                              class="form-control"
+                              autocomplete="street-address"
+                              rows="3"
+                              placeholder="Nhập địa chỉ nhận hàng đầy đủ"></textarea>
+
+                    <span asp-validation-for="ShippingAddress"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="PaymentMethod"
+                           class="form-label"></label>
+
+                    <select asp-for="PaymentMethod"
+                            class="form-select">
+                        <option value="">
+                            -- Chọn phương thức --
+                        </option>
+
+                        <option value="CashOnDelivery">
+                            Thanh toán khi nhận hàng
+                        </option>
+
+                        <option value="BankTransfer">
+                            Chuyển khoản ngân hàng
+                        </option>
+                    </select>
+
+                    <span asp-validation-for="PaymentMethod"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="alert alert-light border small">
+                    Nếu chọn chuyển khoản, đơn hàng vẫn ở trạng thái
+                    chưa thanh toán cho đến khi cửa hàng xác nhận
+                    đã nhận tiền.
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Xác nhận đặt hàng
+                    </button>
+
+                    <a asp-controller="Cart"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary">
+                        Về giỏ hàng
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card card-body">
+            <h4 class="mb-3">Đơn hàng của bạn</h4>
+
+            @foreach (var item in Model.Items)
+            {
+                var product = item.Product;
+                var imageUrl = product.ImageUrl;
+
+                if (string.IsNullOrWhiteSpace(imageUrl))
+                {
+                    imageUrl = product.Name switch
+                    {
+                        "iPhone 15" =>
+                            "~/images/iphone15.jfif",
+
+                        "Samsung Galaxy S24" =>
+                            "~/images/samsung-s24.jfif",
+
+                        "Xiaomi Redmi Note 13" =>
+                            "~/images/xiaomi-note13.jfif",
+
+                        _ => null
+                    };
+                }
+
+                <div class="d-flex align-items-center gap-3 border-bottom py-3">
+                    <div class="checkout-image-box">
+                        @if (!string.IsNullOrWhiteSpace(imageUrl))
+                        {
+                            <img src="@Url.Content(imageUrl)"
+                                 alt="@product.Name"
+                                 class="checkout-product-image"
+                                 loading="lazy" />
+                        }
+                        else
+                        {
+                            <span class="small text-muted">
+                                Chưa có ảnh
+                            </span>
+                        }
+                    </div>
+
+                    <div class="flex-grow-1">
+                        <strong>@product.Name</strong>
+
+                        <div class="text-muted small mt-1">
+                            RAM @product.RamGb GB /
+                            Bộ nhớ @product.StorageGb GB
+                        </div>
+
+                        <div class="text-muted small">
+                            @(product.Price.ToString("N0", culture)) ₫ / máy
+                        </div>
+
+                        <div class="small">
+                            Số lượng: @item.Quantity
+                        </div>
+
+                        <div class="fw-semibold mt-1">
+                            @((product.Price * item.Quantity).ToString("N0", culture)) ₫
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="mt-4">
+                <div class="d-flex justify-content-between gap-3 mb-3">
+                    <span>Tạm tính</span>
+
+                    <strong class="text-nowrap">
+                        @(Model.Subtotal.ToString("N0", culture)) ₫
+                    </strong>
+                </div>
+
+                @if (Model.DiscountAmount > 0)
+                {
+                    <div class="d-flex justify-content-between gap-3 mb-3">
+                        <span>Mã đã áp dụng</span>
+
+                        <span class="badge bg-success text-break">
+                            @Model.PromotionCode
+                        </span>
+                    </div>
+                }
+
+                <div class="d-flex justify-content-between gap-3 text-success mb-3">
+                    <span>Giảm giá</span>
+
+                    <strong class="text-nowrap">
+                        −@(Model.DiscountAmount.ToString("N0", culture)) ₫
+                    </strong>
+                </div>
+
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 border-top pt-3">
+                    <strong>Cần thanh toán</strong>
+
+                    <strong class="text-danger fs-4 text-nowrap">
+                        @(Model.TotalAmount.ToString("N0", culture)) ₫
+                    </strong>
+                </div>
+
+                <p class="text-muted small mt-3 mb-0">
+                    Giá, tồn kho và khuyến mãi được kiểm tra lại
+                    khi xác nhận đặt hàng.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

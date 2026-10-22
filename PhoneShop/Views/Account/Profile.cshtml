@@ -1,0 +1,137 @@
+﻿@model PhoneShop.ViewModels.ProfileViewModel
+
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-12 col-md-9 col-lg-7">
+        <div class="text-center mb-4">
+            <h1 class="mb-2">Thông tin cá nhân</h1>
+
+            <p class="text-muted mb-0">
+                Cập nhật thông tin để thuận tiện khi đặt hàng.
+            </p>
+        </div>
+
+        @if (TempData["ProfileSuccess"] is string message)
+        {
+            <div class="alert alert-success" role="status">
+                @message
+            </div>
+        }
+
+        <div class="card">
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 border-bottom pb-3 mb-4">
+                    <h4 class="mb-0">Hồ sơ tài khoản</h4>
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <span class="badge bg-primary px-3 py-2">
+                            Quản trị viên
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary px-3 py-2">
+                            Khách hàng
+                        </span>
+                    }
+                </div>
+
+                <form asp-controller="Account"
+                      asp-action="Profile"
+                      method="post">
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger mb-3"
+                         role="alert"></div>
+
+                    <div class="mb-3">
+                        <label for="profileEmail"
+                               class="form-label">
+                            Email đăng nhập
+                        </label>
+
+                        <input id="profileEmail"
+                               type="email"
+                               value="@Model.Email"
+                               class="form-control bg-light"
+                               readonly
+                               aria-describedby="profileEmailHelp" />
+
+                        <div id="profileEmailHelp"
+                             class="form-text">
+                            Email đăng nhập không thể thay đổi tại đây.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="FullName"
+                               class="form-label"></label>
+
+                        <input asp-for="FullName"
+                               class="form-control"
+                               autocomplete="name"
+                               placeholder="Nhập họ và tên" />
+
+                        <span asp-validation-for="FullName"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PhoneNumber"
+                               class="form-label"></label>
+
+                        <input asp-for="PhoneNumber"
+                               class="form-control"
+                               autocomplete="tel"
+                               inputmode="tel"
+                               placeholder="Nhập số điện thoại" />
+
+                        <span asp-validation-for="PhoneNumber"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Address"
+                               class="form-label"></label>
+
+                        <textarea asp-for="Address"
+                                  class="form-control"
+                                  autocomplete="street-address"
+                                  rows="3"
+                                  placeholder="Nhập địa chỉ nhận hàng"></textarea>
+
+                        <span asp-validation-for="Address"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="submit"
+                                class="btn btn-primary">
+                            Lưu thay đổi
+                        </button>
+
+                        <a asp-controller="Orders"
+                           asp-action="Index"
+                           class="btn btn-outline-primary">
+                            Đơn hàng của tôi
+                        </a>
+
+                        <a asp-controller="Home"
+                           asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            Về trang chủ
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
